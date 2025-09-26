@@ -16,6 +16,6 @@ public class Usuario {
     private String email;
     private String password;
     private String rol;
-    private String fechaNacimiento;
+    private LocalDate fechaNacimiento;
     private String direccion;
 }
