@@ -19,12 +19,36 @@ async function solicitarAdopcion(mascotaId) {
         return;
     }
     
-    const usuarioNombre = prompt(`¡Hola! 😊 ¿Cuál es tu nombre para adoptar a ${nombreMascota}?`);
+    // Pedir nombre del usuario
+    const usuarioNombre = prompt(`¡Hola! ¿Cuál es tu nombre para adoptar a ${nombreMascota}?`);
     
     if (!usuarioNombre) {
         mostrarNotificacionLocal({
             tipo: 'info',
             mensaje: 'Solicitud cancelada',
+            timestamp: new Date()
+        });
+        return;
+    }
+
+    // Pedir salario del usuario
+    const usuarioSalario = prompt(`¿Cuál es tu salario mensual? (Solo números, sin puntos)\n`);
+    
+    if (!usuarioSalario) {
+        mostrarNotificacionLocal({
+            tipo: 'info',
+            mensaje: 'Solicitud cancelada - Salario no proporcionado',
+            timestamp: new Date()
+        });
+        return;
+    }
+
+    // Validar que el salario sea un número
+    const salarioNumero = parseInt(usuarioSalario.replace(/[^0-9]/g, ''));
+    if (isNaN(salarioNumero)) {
+        mostrarNotificacionLocal({
+            tipo: 'error',
+            mensaje: 'El salario debe ser un número válido',
             timestamp: new Date()
         });
         return;
@@ -39,7 +63,7 @@ async function solicitarAdopcion(mascotaId) {
         // Marcar como pendiente
         estadoApp.solicitudesPendientes.set(mascotaId, true);
         
-        console.log(`🎯 Enviando solicitud para ${mascotaId} - Usuario: ${usuarioNombre}`);
+        console.log(`Enviando solicitud para ${mascotaId} - Usuario: ${usuarioNombre} - Salario: $${salarioNumero.toLocaleString()}`);
         
         // Enviar solicitud al servidor
         const response = await fetch('/solicitar_adopcion', {
@@ -49,7 +73,8 @@ async function solicitarAdopcion(mascotaId) {
             },
             body: JSON.stringify({
                 mascota_id: mascotaId,
-                usuario_nombre: usuarioNombre
+                usuario_nombre: usuarioNombre,
+                usuario_salario: salarioNumero
             })
         });
 
@@ -250,8 +275,9 @@ function getIcono(tipo) {
 
 // Inicializar aplicación
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🐾 PetConnect con RabbitMQ - PRECISIÓN TOTAL');
-    console.log('📝 GETs exactos: 1 al cargar, 1 por adopción, 1 por limpiar');
+    console.log(' PetConnect con RabbitMQ - VALIDACIÓN DE SALARIO ACTIVADA');
+    console.log('Mínimo requerido: $1,600,000');
+    console.log('GETs exactos: 1 al cargar, 1 por adopción, 1 por limpiar');
     
     // Cargar notificaciones iniciales SOLO UNA VEZ
     cargarNotificaciones();

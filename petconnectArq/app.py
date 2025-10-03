@@ -33,22 +33,22 @@ class RabbitMQManager:
             connection.close()
             
             # Solo log en consola para debugging
-            print(f"📤 Mensaje enviado a cola '{queue_name}': {message['mascota_id']}")
+            print(f"- Mensaje enviado a cola '{queue_name}': {message['mascota_id']}")
             
             return True
             
         except Exception as e:
-            print(f"❌ ERROR RabbitMQ: No se pudo conectar: {str(e)}")
+            print(f"ERROR RabbitMQ: No se pudo conectar: {str(e)}")
             return False
     
-    def process_adoption(self, mascota_id, usuario_nombre):
+    def process_adoption(self, mascota_id, usuario_nombre, usuario_salario):
         """Procesa una solicitud de adopción paso a paso CON notificaciones de proceso"""
-        print(f"🔹 Iniciando proceso para {mascota_id} - Usuario: {usuario_nombre}")
+        print(f"Iniciando proceso para {mascota_id} - Usuario: {usuario_nombre} - Salario: ${usuario_salario:,}")
         
         # Notificación de INICIO
         self.add_notification(
-            "📤 SOLICITUD ENVIADA", 
-            f"Solicitud enviada para {mascota_id} - Usuario: {usuario_nombre}",
+            "SOLICITUD ENVIADA", 
+            f"Solicitud enviada para {mascota_id} - Usuario: {usuario_nombre} - Salario: ${usuario_salario:,}",
             "envio"
         )
         
@@ -56,6 +56,7 @@ class RabbitMQManager:
         solicitud = {
             'mascota_id': mascota_id,
             'usuario': usuario_nombre,
+            'salario': usuario_salario,
             'timestamp': time.time(),
             'tipo': 'solicitud_adopcion',
             'accion': 'inicio_proceso'
@@ -69,22 +70,35 @@ class RabbitMQManager:
         
         # Notificación de PROCESAMIENTO
         self.add_notification(
-            "⚙️ PROCESANDO SOLICITUD", 
-            f"Validando solicitud de {usuario_nombre} para {mascota_id}",
+            "PROCESANDO SOLICITUD", 
+            f"Validando solicitud de {usuario_nombre} para {mascota_id} - Validando salario...",
             "procesamiento"
         )
         
         time.sleep(1)
         
-        # Simular validación (reglas simples)
-        aprobado = len(usuario_nombre) > 3  # Nombre debe tener más de 3 letras
-        resultado = "APROBADA 🎉" if aprobado else "RECHAZADA ❌"
-        motivo = "¡Cumples con los requisitos!" if aprobado else "Nombre muy corto para validación"
+        # Validación de salario (mayor a 1,600,000)
+        salario_suficiente = usuario_salario >= 1600000
+        nombre_valido = len(usuario_nombre) > 3
+        
+        # Aprobado solo si cumple ambas condiciones
+        aprobado = salario_suficiente and nombre_valido
+        
+        if not salario_suficiente:
+            resultado = "RECHAZADA"
+            motivo = f"Salario insuficiente (${usuario_salario:,}) para aplicar en la adopción de la mascota. Mínimo requerido: $1,600,000"
+        elif not nombre_valido:
+            resultado = "RECHAZADA"
+            motivo = "Nombre muy corto para validación"
+        else:
+            resultado = "APROBADA"
+            motivo = "¡Cumples con todos los requisitos!"
         
         # PASO 3: Enviar RESULTADO a RabbitMQ
         respuesta = {
             'mascota_id': mascota_id,
             'usuario': usuario_nombre,
+            'salario': usuario_salario,
             'resultado': resultado,
             'aprobado': aprobado,
             'motivo': motivo,
@@ -97,7 +111,7 @@ class RabbitMQManager:
             # Notificación de RESULTADO
             tipo_notificacion = "respuesta" if aprobado else "error"
             self.add_notification(
-                "📥 RESULTADO FINAL", 
+                "- RESULTADO FINAL", 
                 f"{mascota_id} → {resultado} | Motivo: {motivo}",
                 tipo_notificacion
             )
@@ -106,7 +120,8 @@ class RabbitMQManager:
             'aprobado': aprobado,
             'resultado': resultado,
             'mascota_id': mascota_id,
-            'motivo': motivo
+            'motivo': motivo,
+            'salario_usuario': usuario_salario
         }
     
     def add_notification(self, titulo, mensaje, tipo):
@@ -121,7 +136,7 @@ class RabbitMQManager:
         }
         
         self.notifications.insert(0, notification)  # Agregar al inicio
-        print(f"🔔 Notificación: {titulo} - {mensaje}")
+        print(f"- Notificación: {titulo} - {mensaje}")
         
         # Mantener máximo 15 notificaciones
         if len(self.notifications) > 15:
@@ -147,23 +162,31 @@ def solicitar_adopcion():
     datos = request.json
     mascota_id = datos.get('mascota_id')
     usuario_nombre = datos.get('usuario_nombre', 'Usuario Anónimo')
+    usuario_salario = datos.get('usuario_salario', 0)
     
     if not mascota_id:
         return jsonify({'error': 'No se especificó mascota'}), 400
     
     try:
-        print(f"🎯 Nueva solicitud: {mascota_id} por {usuario_nombre}")
+        # Convertir salario a entero
+        usuario_salario = int(usuario_salario)
         
-        resultado = rabbit_mq.process_adoption(mascota_id, usuario_nombre)
+        print(f"- Nueva solicitud: {mascota_id} por {usuario_nombre} - Salario: ${usuario_salario:,}")
+        
+        resultado = rabbit_mq.process_adoption(mascota_id, usuario_nombre, usuario_salario)
         
         return jsonify({
             'estado': 'success',
             'resultado': resultado
         })
         
+    except ValueError:
+        print(f"Error: Salario no válido")
+        rabbit_mq.add_notification("ERROR", "El salario debe ser un número válido", "error")
+        return jsonify({'error': 'El salario debe ser un número válido'}), 400
     except Exception as e:
-        print(f"❌ Error en solicitud: {e}")
-        rabbit_mq.add_notification("❌ ERROR", f"Error procesando solicitud: {str(e)}", "error")
+        print(f"Error en solicitud: {e}")
+        rabbit_mq.add_notification("ERROR", f"Error procesando solicitud: {str(e)}", "error")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/notificaciones')
@@ -197,7 +220,7 @@ def reset_rabbitmq():
         rabbit_mq.clear_notifications()
         
         # Notificación de reset
-        rabbit_mq.add_notification("🔄 SISTEMA REINICIADO", "Colas de RabbitMQ reseteadas correctamente", "info")
+        rabbit_mq.add_notification("- SISTEMA REINICIADO", "Colas de RabbitMQ reseteadas correctamente", "info")
         
         return jsonify({
             'estado': 'success', 
@@ -205,10 +228,10 @@ def reset_rabbitmq():
         })
         
     except Exception as e:
-        rabbit_mq.add_notification("❌ ERROR RESET", f"Error reseteando RabbitMQ: {str(e)}", "error")
+        rabbit_mq.add_notification("- ERROR RESET", f"Error reseteando RabbitMQ: {str(e)}", "error")
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    print("🚀 Iniciando PetConnect con RabbitMQ...")
-    print("📊 Las notificaciones aparecerán durante el proceso de adopción")
+    print("- Iniciando PetConnect con RabbitMQ...")
+    print("- Validación de salario activada: Mínimo $1,600,000")
     app.run(debug=True, port=5000)
