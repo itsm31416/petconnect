@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetConnect 🐾 - Encuentra tu compañero perfecto</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <div class="logo">
+                    <i class="fas fa-paw"></i>
+                    <span>PetConnect</span>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="#inicio">Inicio</a></li>
+                    <li><a href="#mascotas">Mascotas</a></li>
+                    <li><a href="#proceso">Proceso</a></li>
+                    <li><a href="#contacto">Contacto</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="inicio" class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Encuentra tu <span class="highlight">mejor amigo</span> 🐕🐈</h1>
+                <p>Conectamos corazones con patitas que necesitan un hogar lleno de amor</p>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="number">1,247</span>
+                        <span class="label">Mascotas adoptadas</span>
+                    </div>
+                    <div class="stat">
+                        <span class="number">89%</span>
+                        <span class="label">Tasa de éxito</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-paws">
+                <div class="paw"></div>
+                <div class="paw"></div>
+                <div class="paw"></div>
+                <div class="paw"></div>
+                <div class="paw"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mascotas Section -->
+    <section id="mascotas" class="mascotas">
+        <div class="container">
+            <h2>Nuestros Amigos Esperando Hogar 🏠</h2>
+            <div class="mascotas-grid">
+                <!-- Mascota 1 -->
+                <div class="mascota-card" data-mascota-id="Budy_001">
+                    <div class="mascota-img">
+                        <img src="https://images.unsplash.com/photo-1552053831-71594a27632d?w=300&h=200&fit=crop" alt="Budy">
+                        <div class="mascota-badge perro">Perro</div>
+                    </div>
+                    <div class="mascota-info">
+                        <h3>Budy</h3>
+                        <div class="mascota-details">
+                            <span><i class="fas fa-venus-mars"></i> Macho</span>
+                            <span><i class="fas fa-birthday-cake"></i> 2 años</span>
+                            <span><i class="fas fa-ruler"></i> Mediano</span>
+                        </div>
+                        <p>Budy es un golden retriever juguetón y cariñoso. Le encanta correr y jugar a la pelota.</p>
+                        <button class="btn-adoptar" onclick="solicitarAdopcion('Budy_001')">
+                            <i class="fas fa-heart"></i> Solicitar Adopción
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mascota 2 -->
+                <div class="mascota-card" data-mascota-id="Luna_002">
+                    <div class="mascota-img">
+                        <img src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=300&h=200&fit=crop" alt="Luna">
+                        <div class="mascota-badge gato">Gato</div>
+                    </div>
+                    <div class="mascota-info">
+                        <h3>Luna</h3>
+                        <div class="mascota-details">
+                            <span><i class="fas fa-venus-mars"></i> Hembra</span>
+                            <span><i class="fas fa-birthday-cake"></i> 1 año</span>
+                            <span><i class="fas fa-ruler"></i> Pequeño</span>
+                        </div>
+                        <p>Luna es una gatita tranquila y curiosa. Le gusta observar desde la ventana y tomar siestas al sol.</p>
+                        <button class="btn-adoptar" onclick="solicitarAdopcion('Luna_002')">
+                            <i class="fas fa-heart"></i> Solicitar Adopción
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mascota 3 -->
+                <div class="mascota-card" data-mascota-id="Max_003">
+                    <div class="mascota-img">
+                        <img src="https://images.unsplash.com/photo-1588943211346-0908a1fb0b01?w=300&h=200&fit=crop" alt="Max">
+                        <div class="mascota-badge perro">Perro</div>
+                    </div>
+                    <div class="mascota-info">
+                        <h3>Max</h3>
+                        <div class="mascota-details">
+                            <span><i class="fas fa-venus-mars"></i> Macho</span>
+                            <span><i class="fas fa-birthday-cake"></i> 3 años</span>
+                            <span><i class="fas fa-ruler"></i> Grande</span>
+                        </div>
+                        <p>Max es un pastor alemán leal y protector. Ideal para familias activas que disfruten de paseos largos.</p>
+                        <button class="btn-adoptar" onclick="solicitarAdopcion('Max_003')">
+                            <i class="fas fa-heart"></i> Solicitar Adopción
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Proceso Section -->
+    <section id="proceso" class="proceso">
+        <div class="container">
+            <h2>¿Cómo Funciona Nuestro Sistema? 🔄</h2>
+            <div class="proceso-steps">
+                <div class="step">
+                    <div class="step-icon">1</div>
+                    <h3>Solicitud</h3>
+                    <p>Envías tu solicitud de adopción a través de nuestra plataforma</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">2</div>
+                    <h3>Procesamiento</h3>
+                    <p>Nuestro sistema RabbitMQ procesa y valida tu solicitud automáticamente</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">3</div>
+                    <h3>Notificación</h3>
+                    <p>Recibes una notificación instantánea con el resultado de tu solicitud</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sistema RabbitMQ Info -->
+    <section class="sistema-info">
+        <div class="container">
+            <h2>Sistema de Mensajería en Tiempo Real 🚀</h2>
+            <div class="sistema-grid">
+                <div class="sistema-item">
+                    <div class="sistema-icon">
+                        <i class="fas fa-paper-plane"></i>
+                    </div>
+                    <h3>Productor</h3>
+                    <p>Envía solicitudes de adopción a la cola de RabbitMQ</p>
+                </div>
+                <div class="sistema-item">
+                    <div class="sistema-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <h3>Procesador</h3>
+                    <p>Procesa las solicitudes y aplica las reglas de validación</p>
+                </div>
+                <div class="sistema-item">
+                    <div class="sistema-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <h3>Consumidor</h3>
+                    <p>Recibe los resultados y envía notificaciones en tiempo real</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Notificaciones Live -->
+    <section class="notificaciones-live">
+        <div class="container">
+            <h2>Notificaciones en Tiempo Real 🔔</h2>
+            <div id="notificaciones-container" class="notificaciones-container">
+                <div class="notificacion-placeholder">
+                    <i class="fas fa-paw"></i>
+                    <p>Las notificaciones de adopción aparecerán aquí en tiempo real</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contacto" class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>PetConnect 🐾</h3>
+                    <p>Conectando corazones con patitas desde 2024</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Contacto</h4>
+                    <p><i class="fas fa-envelope"></i> hola@petconnect.com</p>
+                    <p><i class="fas fa-phone"></i> +1 234 567 890</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Síguenos</h4>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
