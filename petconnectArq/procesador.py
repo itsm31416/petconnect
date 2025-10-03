@@ -34,12 +34,12 @@ class ProcesadorAdopciones:
             # Publicar resultado
             self.publicar_resultado(solicitud, resultado)
             
-            print(f"✅ [Procesador] Solicitud procesada: {mascota_id} - {'APROBADA' if resultado['aprobado'] else 'RECHAZADA'}")
+            print(f"[Procesador] Solicitud procesada: {mascota_id} - {'APROBADA' if resultado['aprobado'] else 'RECHAZADA'}")
             
             ch.basic_ack(delivery_tag=method.delivery_tag)
             
         except Exception as e:
-            print(f"❌ [Procesador] Error procesando solicitud: {e}")
+            print(f"[Procesador] Error procesando solicitud: {e}")
     
     def validar_adopcion_completa(self, solicitud):
         """Valida la adopción con criterios detallados."""
@@ -115,16 +115,16 @@ class ProcesadorAdopciones:
         if aprobado:
             mensajes = [
                 f"¡Felicidades! 🎉 Has sido aprobado para adoptar a {nombre_mascota}.",
-                f"¡Buenas noticias! 🤗 {nombre_mascota} pronto será parte de tu familia.",
-                f"¡Adopción aprobada! 🐾 {nombre_mascota} te está esperando.",
-                f"¡Completaste el proceso! ✅ Prepárate para recibir a {nombre_mascota}."
+                f"¡Buenas noticias! {nombre_mascota} pronto será parte de tu familia.",
+                f"¡Adopción aprobada! {nombre_mascota} te está esperando.",
+                f"¡Completaste el proceso! Prepárate para recibir a {nombre_mascota}."
             ]
         else:
             mensajes = [
-                f"Lo sentimos 😔, no cumples con los requisitos para adoptar a {nombre_mascota}.",
-                f"Por esta vez no fue posible 😟. {nombre_mascota} necesita otro tipo de hogar.",
-                f"Tu solicitud no pudo ser aprobada 📝. Te invitamos a ver otras mascotas.",
-                f"Los requisitos no coinciden 🔍. Pero tenemos muchos amigos esperando por ti."
+                f"Lo sentimos, no cumples con los requisitos para adoptar a {nombre_mascota}.",
+                f"Por esta vez no fue posible. {nombre_mascota} necesita otro tipo de hogar.",
+                f"Tu solicitud no pudo ser aprobada. Te invitamos a ver otras mascotas.",
+                f"Los requisitos no coinciden. Pero tenemos muchos amigos esperando por ti."
             ]
         
         return random.choice(mensajes)
@@ -147,8 +147,8 @@ class ProcesadorAdopciones:
     
     def iniciar_procesamiento(self):
         """Inicia el consumo de solicitudes de adopción."""
-        print("🚀 [Procesador v2] Iniciando procesador inteligente...")
-        print("📊 Sistema de validación con 5 criterios activado")
+        print("[Procesador v2] Iniciando procesador inteligente...")
+        print("Sistema de validación con 5 criterios activado")
         
         self.canal.basic_qos(prefetch_count=1)
         self.canal.basic_consume(
@@ -159,9 +159,9 @@ class ProcesadorAdopciones:
         try:
             self.canal.start_consuming()
         except KeyboardInterrupt:
-            print("⏹️ [Procesador] Deteniendo procesador...")
+            print("[Procesador] Deteniendo procesador...")
         except Exception as e:
-            print(f"💥 [Procesador] Error: {e}")
+            print(f"[Procesador] Error: {e}")
 
 if __name__ == "__main__":
     procesador = ProcesadorAdopciones()

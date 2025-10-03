@@ -47,7 +47,7 @@ class ProductorAdopciones:
             body=json.dumps(notificacion)
         )
         
-        print(f"🔔 [Productor] Notificación enviada: {mensaje}")
+        print(f"[Productor] Notificación enviada: {mensaje}")
 
 def simular_solicitudes():
     """Simula múltiples solicitudes de adopción para testing."""

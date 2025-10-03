@@ -17,50 +17,50 @@ class ConsumidorResultados:
             solicitud = resultado['solicitud_original']
             datos_resultado = resultado['resultado']
             
-            emoji = "✅" if datos_resultado['aprobado'] else "❌"
-            logger.info(f"{emoji} [Consumidor] Resultado recibido:")
+            estado = "APROBADO" if datos_resultado['aprobado'] else "RECHAZADO"
+            logger.info(f"[Consumidor] Resultado recibido:")
             logger.info(f"   Mascota: {solicitud['mascota_id']}")
             logger.info(f"   Usuario: {solicitud['usuario_id']}")
-            logger.info(f"   Estado: {'APROBADO' if datos_resultado['aprobado'] else 'RECHAZADO'}")
+            logger.info(f"   Estado: {estado}")
             logger.info(f"   Mensaje: {datos_resultado['mensaje']}")
             
             # Mostrar criterios evaluados
             if 'criterios_evaluados' in datos_resultado:
                 logger.info("   Criterios evaluados:")
                 for criterio, valor in datos_resultado['criterios_evaluados'].items():
-                    estado = "✓" if valor else "✗"
-                    logger.info(f"     {estado} {criterio}")
+                    estado_criterio = "CUMPLE" if valor else "NO CUMPLE"
+                    logger.info(f"     {estado_criterio} {criterio}")
             
-            logger.info("🎉" + "="*50 + "🎉")
+            logger.info("=" * 50)
             
             ch.basic_ack(delivery_tag=method.delivery_tag)
             
         except Exception as e:
-            logger.error(f"❌ [Consumidor] Error procesando resultado: {e}")
+            logger.error(f"[Consumidor] Error procesando resultado: {e}")
     
     def manejar_notificacion(self, ch, method, properties, body):
         """Maneja las notificaciones del sistema."""
         try:
             notificacion = json.loads(body.decode())
             
-            tipo_emoji = {
-                'success': '✅',
-                'warning': '⚠️',
-                'info': 'ℹ️',
-                'error': '❌'
+            tipo_texto = {
+                'success': 'EXITO',
+                'warning': 'ADVERTENCIA',
+                'info': 'INFORMACION',
+                'error': 'ERROR'
             }
             
-            emoji = tipo_emoji.get(notificacion['tipo_notificacion'], '📢')
-            logger.info(f"{emoji} [Notificación] Para {notificacion['usuario_id']}: {notificacion['mensaje']}")
+            tipo = tipo_texto.get(notificacion['tipo_notificacion'], 'NOTIFICACION')
+            logger.info(f"[{tipo}] Para {notificacion['usuario_id']}: {notificacion['mensaje']}")
             
             ch.basic_ack(delivery_tag=method.delivery_tag)
             
         except Exception as e:
-            logger.error(f"❌ [Consumidor] Error procesando notificación: {e}")
+            logger.error(f"[Consumidor] Error procesando notificación: {e}")
     
     def iniciar_consumo(self):
         """Inicia el consumo de resultados y notificaciones."""
-        print("👂 [Consumidor] Iniciando consumidor de resultados...")
+        print("[Consumidor] Iniciando consumidor de resultados...")
         
         # Consumir resultados de adopción
         self.canal.basic_consume(
@@ -75,12 +75,12 @@ class ConsumidorResultados:
         )
         
         try:
-            print("🔄 [Consumidor] Escuchando resultados y notificaciones...")
+            print("[Consumidor] Escuchando resultados y notificaciones...")
             self.canal.start_consuming()
         except KeyboardInterrupt:
-            print("⏹️ [Consumidor] Deteniendo consumidor...")
+            print("[Consumidor] Deteniendo consumidor...")
         except Exception as e:
-            print(f"💥 [Consumidor] Error: {e}")
+            print(f"[Consumidor] Error: {e}")
 
 if __name__ == "__main__":
     consumidor = ConsumidorResultados()

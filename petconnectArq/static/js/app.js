@@ -13,14 +13,14 @@ async function solicitarAdopcion(mascotaId) {
     if (estadoApp.solicitudesPendientes.has(mascotaId)) {
         mostrarNotificacionLocal({
             tipo: 'warning',
-            mensaje: `Ya estás procesando adopción para ${nombreMascota} ⏳`,
+            mensaje: `Ya estás procesando adopción para ${nombreMascota}`,
             timestamp: new Date()
         });
         return;
     }
     
     // Pedir nombre del usuario
-    const usuarioNombre = prompt(`¡Hola! ¿Cuál es tu nombre para adoptar a ${nombreMascota}?`);
+    const usuarioNombre = prompt(`Hola! ¿Cuál es tu nombre para adoptar a ${nombreMascota}?`);
     
     if (!usuarioNombre) {
         mostrarNotificacionLocal({
@@ -125,7 +125,7 @@ function actualizarBotonMascota(mascotaId, aprobado) {
     if (!boton) return;
     
     if (aprobado) {
-        boton.innerHTML = '<i class="fas fa-check"></i> ¡Aprobado!';
+        boton.innerHTML = '<i class="fas fa-check"></i> Aprobado!';
         boton.disabled = true;
         boton.classList.remove('procesando');
         boton.classList.add('aprobado');
@@ -162,16 +162,9 @@ function mostrarNotificacionLocal(notificacion) {
     
     const tiempo = new Date(notificacion.timestamp).toLocaleTimeString();
     
-    // Icono según tipo
-    let icono = '🔔';
-    if (notificacion.tipo === 'success') icono = '✅';
-    if (notificacion.tipo === 'error') icono = '❌';
-    if (notificacion.tipo === 'warning') icono = '⚠️';
-    if (notificacion.tipo === 'info') icono = 'ℹ️';
-    
     notificacionElement.innerHTML = `
         <div class="notificacion-header">
-            <span class="notificacion-tipo">${icono} ${notificacion.tipo.toUpperCase()}</span>
+            <span class="notificacion-tipo">${notificacion.tipo.toUpperCase()}</span>
             <span class="notificacion-tiempo">${tiempo}</span>
         </div>
         <div class="notificacion-mensaje">${notificacion.mensaje}</div>
@@ -228,7 +221,7 @@ async function cargarNotificaciones() {
                 
                 notificacionElement.innerHTML = `
                     <div class="notificacion-header">
-                        <span class="notificacion-tipo">${getIcono(notif.tipo)} ${notif.titulo}</span>
+                        <span class="notificacion-tipo">${notif.titulo}</span>
                         <span class="notificacion-tiempo">${notif.timestamp}</span>
                     </div>
                     <div class="notificacion-mensaje">${notif.mensaje}</div>
@@ -259,23 +252,9 @@ async function limpiarNotificaciones() {
     }
 }
 
-// Función auxiliar para obtener iconos
-function getIcono(tipo) {
-    const iconos = {
-        'envio': '📤',
-        'procesamiento': '⚙️',
-        'respuesta': '📥',
-        'error': '❌',
-        'warning': '⚠️',
-        'success': '✅',
-        'info': 'ℹ️'
-    };
-    return iconos[tipo] || '🔔';
-}
-
 // Inicializar aplicación
 document.addEventListener('DOMContentLoaded', function() {
-    console.log(' PetConnect con RabbitMQ - VALIDACIÓN DE SALARIO ACTIVADA');
+    console.log('PetConnect con RabbitMQ - VALIDACIÓN DE SALARIO ACTIVADA');
     console.log('Mínimo requerido: $1,600,000');
     console.log('GETs exactos: 1 al cargar, 1 por adopción, 1 por limpiar');
     

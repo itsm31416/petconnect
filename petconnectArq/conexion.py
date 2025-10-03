@@ -15,10 +15,10 @@ def conectar_rabbitmq():
             )
         )
         canal = conexion.channel()
-        logger.info("✅ Conexión establecida con RabbitMQ")
+        logger.info("Conexión establecida con RabbitMQ")
         return canal
     except Exception as e:
-        logger.error(f"❌ Error conectando a RabbitMQ: {e}")
+        logger.error(f"Error conectando a RabbitMQ: {e}")
         raise
 
 def declarar_colas(canal):
@@ -27,4 +27,4 @@ def declarar_colas(canal):
     
     for cola in colas:
         canal.queue_declare(queue=cola, durable=True)
-        logger.info(f"📦 Cola '{cola}' declarada correctamente")
+        logger.info(f"Cola '{cola}' declarada correctamente")
