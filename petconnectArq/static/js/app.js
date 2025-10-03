@@ -1,12 +1,13 @@
 // Estado de la aplicación
 let estadoApp = {
-    solicitudesPendientes: new Map()
+    solicitudesPendientes: new Map(),
+    notificacionesCargadas: false
 };
 
 // Función para solicitar adopción
 async function solicitarAdopcion(mascotaId) {
     const boton = document.querySelector(`[data-mascota-id="${mascotaId}"] .btn-adoptar`);
-    const nombreMascota = mascotaId.split('_')[0]; // Ej: "Budy_001" -> "Budy"
+    const nombreMascota = mascotaId.split('_')[0];
     
     // Verificar si ya hay una solicitud pendiente
     if (estadoApp.solicitudesPendientes.has(mascotaId)) {
@@ -58,8 +59,8 @@ async function solicitarAdopcion(mascotaId) {
             // Actualizar el botón según el resultado
             actualizarBotonMascota(mascotaId, resultado.resultado.aprobado);
             
-            // Recargar notificaciones para ver las nuevas
-            setTimeout(cargarNotificaciones, 500);
+            // SOLO UNA recarga de notificaciones después de la acción
+            await cargarNotificaciones();
             
         } else {
             throw new Error(resultado.error);
@@ -111,11 +112,13 @@ function actualizarBotonMascota(mascotaId, aprobado) {
         boton.classList.add('rechazado');
         boton.style.background = 'linear-gradient(135deg, #EF476F, #E84393)';
         
-        // Restaurar después de 3 segundos
+        // Restaurar después de 3 segundos SIN recargar notificaciones
         setTimeout(() => {
-            boton.innerHTML = '<i class="fas fa-heart"></i> Intentar nuevamente';
-            boton.classList.remove('rechazado');
-            boton.style.background = 'linear-gradient(135deg, var(--primary), var(--secondary))';
+            if (!boton.disabled) { // Solo si no fue aprobado después
+                boton.innerHTML = '<i class="fas fa-heart"></i> Intentar nuevamente';
+                boton.classList.remove('rechazado');
+                boton.style.background = 'linear-gradient(135deg, var(--primary), var(--secondary))';
+            }
         }, 3000);
     }
 }
@@ -213,6 +216,8 @@ async function cargarNotificaciones() {
             placeholder.style.display = 'block';
         }
         
+        estadoApp.notificacionesCargadas = true;
+        
     } catch (error) {
         console.error('Error cargando notificaciones:', error);
     }
@@ -222,7 +227,8 @@ async function cargarNotificaciones() {
 async function limpiarNotificaciones() {
     try {
         await fetch('/limpiar_notificaciones', { method: 'POST' });
-        cargarNotificaciones(); // Recargar para mostrar placeholder
+        // Recargar notificaciones SOLO UNA VEZ después de limpiar
+        await cargarNotificaciones();
     } catch (error) {
         console.error('Error limpiando notificaciones:', error);
     }
@@ -236,21 +242,19 @@ function getIcono(tipo) {
         'respuesta': '📥',
         'error': '❌',
         'warning': '⚠️',
-        'success': '✅'
+        'success': '✅',
+        'info': 'ℹ️'
     };
     return iconos[tipo] || '🔔';
 }
 
 // Inicializar aplicación
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🐾 PetConnect con RabbitMQ REAL inicializado');
-    console.log('📝 Las notificaciones SOLO aparecerán cuando hagas clic en "Solicitar Adopción"');
+    console.log('🐾 PetConnect con RabbitMQ - PRECISIÓN TOTAL');
+    console.log('📝 GETs exactos: 1 al cargar, 1 por adopción, 1 por limpiar');
     
-    // Cargar notificaciones iniciales
+    // Cargar notificaciones iniciales SOLO UNA VEZ
     cargarNotificaciones();
-    
-    // Actualizar notificaciones cada 3 segundos (solo para ver las nuevas)
-    setInterval(cargarNotificaciones, 3000);
     
     // Efectos de scroll suave
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -339,6 +343,11 @@ const estilosAdicionales = `
 .notificacion.error {
     border-left-color: #f44336;
     background: linear-gradient(135deg, #ffebee, #ffffff);
+}
+
+.notificacion.info {
+    border-left-color: #2196F3;
+    background: linear-gradient(135deg, #e3f2fd, #ffffff);
 }
 `;
 
