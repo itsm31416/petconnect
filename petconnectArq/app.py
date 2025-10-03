@@ -12,7 +12,7 @@ class RabbitMQManager:
         self.notifications = []
     
     def send_to_rabbitmq(self, queue_name, message):
-        """Envía mensaje a RabbitMQ y muestra en notificaciones"""
+        """Envía mensaje a RabbitMQ SIN notificaciones automáticas"""
         try:
             # Conexión real a RabbitMQ
             connection = pika.BlockingConnection(
@@ -32,22 +32,25 @@ class RabbitMQManager:
             
             connection.close()
             
-            # Agregar notificación de ENVÍO
-            self.add_notification(
-                "📤 PRODUCTOR RabbitMQ", 
-                f"Enviado a cola '{queue_name}': Solicitud para {message['mascota_id']}",
-                "envio"
-            )
+            # Solo log en consola para debugging
+            print(f"📤 Mensaje enviado a cola '{queue_name}': {message['mascota_id']}")
             
             return True
             
         except Exception as e:
-            self.add_notification("❌ ERROR RabbitMQ", f"No se pudo conectar: {str(e)}", "error")
+            print(f"❌ ERROR RabbitMQ: No se pudo conectar: {str(e)}")
             return False
     
     def process_adoption(self, mascota_id, usuario_nombre):
-        """Procesa una solicitud de adopción paso a paso"""
+        """Procesa una solicitud de adopción paso a paso CON notificaciones de proceso"""
         print(f"🔹 Iniciando proceso para {mascota_id} - Usuario: {usuario_nombre}")
+        
+        # Notificación de INICIO
+        self.add_notification(
+            "📤 SOLICITUD ENVIADA", 
+            f"Solicitud enviada para {mascota_id} - Usuario: {usuario_nombre}",
+            "envio"
+        )
         
         # PASO 1: Enviar solicitud a RabbitMQ
         solicitud = {
@@ -62,14 +65,16 @@ class RabbitMQManager:
             return {'error': 'No se pudo enviar a RabbitMQ'}
         
         # PASO 2: Simular procesamiento (2 segundos)
-        time.sleep(2)
+        time.sleep(1)
         
-        # Agregar notificación de PROCESAMIENTO
+        # Notificación de PROCESAMIENTO
         self.add_notification(
-            "⚙️ PROCESADOR RabbitMQ", 
-            f"Procesando: {usuario_nombre} → {mascota_id}",
+            "⚙️ PROCESANDO SOLICITUD", 
+            f"Validando solicitud de {usuario_nombre} para {mascota_id}",
             "procesamiento"
         )
+        
+        time.sleep(1)
         
         # Simular validación (reglas simples)
         aprobado = len(usuario_nombre) > 3  # Nombre debe tener más de 3 letras
@@ -89,11 +94,12 @@ class RabbitMQManager:
         }
         
         if self.send_to_rabbitmq('respuestas_adopcion', respuesta):
-            # Notificación final del CONSUMIDOR
+            # Notificación de RESULTADO
+            tipo_notificacion = "respuesta" if aprobado else "error"
             self.add_notification(
-                "📥 CONSUMIDOR RabbitMQ", 
-                f"RESULTADO: {mascota_id} → {resultado} | Motivo: {motivo}",
-                "respuesta" if aprobado else "error"
+                "📥 RESULTADO FINAL", 
+                f"{mascota_id} → {resultado} | Motivo: {motivo}",
+                tipo_notificacion
             )
         
         return {
@@ -157,6 +163,7 @@ def solicitar_adopcion():
         
     except Exception as e:
         print(f"❌ Error en solicitud: {e}")
+        rabbit_mq.add_notification("❌ ERROR", f"Error procesando solicitud: {str(e)}", "error")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/notificaciones')
@@ -189,15 +196,19 @@ def reset_rabbitmq():
         
         rabbit_mq.clear_notifications()
         
+        # Notificación de reset
+        rabbit_mq.add_notification("🔄 SISTEMA REINICIADO", "Colas de RabbitMQ reseteadas correctamente", "info")
+        
         return jsonify({
             'estado': 'success', 
             'mensaje': 'Colas de RabbitMQ reseteadas correctamente'
         })
         
     except Exception as e:
+        rabbit_mq.add_notification("❌ ERROR RESET", f"Error reseteando RabbitMQ: {str(e)}", "error")
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     print("🚀 Iniciando PetConnect con RabbitMQ...")
-    print("📊 Las notificaciones SOLO aparecerán cuando hagas clic en los botones")
+    print("📊 Las notificaciones aparecerán durante el proceso de adopción")
     app.run(debug=True, port=5000)
