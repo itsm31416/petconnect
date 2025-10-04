@@ -22,7 +22,7 @@ class ProcesadorAdopciones:
             mascota_id = solicitud['mascota_id']
             usuario_id = solicitud['usuario_id']
             
-            print(f"🐕 [Procesador] Procesando solicitud: {mascota_id} para {usuario_id}")
+            print(f"[Procesador] Procesando solicitud: {mascota_id} para {usuario_id}")
             
             # Simular tiempo de procesamiento realista
             tiempo_procesamiento = random.uniform(1, 3)
